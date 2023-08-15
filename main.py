@@ -19,8 +19,10 @@ class Person:
 
 #function for services
 def services(*args):
+    count=1
     for s in args:
-        speak(f'{len(s)}.{s}') 
+        speak(f'{count}.{s}') 
+        count+=1
 
 
 
@@ -60,12 +62,12 @@ def respond(voice_data):
     ''' function that relies what is in the  '''
 
     # requesting for user name
-    if 'yes' in voice_data:
-        user = record_audio('Please what is your name')
-        print(user)
-        person_obj.setName(user.split('is')[-1])
-        speak(f'welcome {user},below are my services')
-        services('date request','make searches','play music','ask for anything you want')
+    if 'my name is' in voice_data:
+        name = voice_data.split('is')[-1]
+        speak(voice_data)
+        person_obj.setName(name)
+        speak(f'welcome{person_obj.name},below are my services')
+        services('date','time','make searches','play music','youtube','ask for anything you want')
 
     # when alexa is being asked of her name
     if 'what is your name' in voice_data:
@@ -74,9 +76,9 @@ def respond(voice_data):
     # when alexa is being called
     if 'Alexa' in voice_data:
         if person_obj.name:
-            speak('Hi aminat!')
+            speak(f'Hi {person_obj.name}!')
         else:
-            speak('Hi')
+            speak('Hi,what is your name')
 
     #request for date
     if 'date' in voice_data:
@@ -84,10 +86,10 @@ def respond(voice_data):
 
     # search for something
     if 'search' in voice_data:
-        search = record_audio('what do you want to search for?')
+        search =voice_data.split('for')[-1]
         url = 'https://google.com/search?q='+search
         webbrowser.get().open(url)
-        speak('this is the result for '+ search + ',',+{person_obj.name})
+        speak('this is the result for '+ search + ',',+ {person_obj.name})
     
     # search on youtube
     if "youtube" in voice_data:
@@ -96,6 +98,13 @@ def respond(voice_data):
         webbrowser.get().open(url)
         speak(f'Here is what I found for {search_term} on youtube')
 
+    # search on youtube
+    if "play me " in voice_data:
+        music_term = voice_data.split("play me")[-1]
+        url = f"https://music.youtube.com/search?q={''.join([music_term])}"
+        webbrowser.get().open(url)
+        speak(f'here are the result for  {music_term} on youtube music {person_obj.name}, please kindly choose the one to play')
+
     # exit the alexa or off alexa
     if 'exit' in voice_data:
         speak('going offline')
@@ -103,7 +112,7 @@ def respond(voice_data):
 
 person_obj= Person()# user instance
 time.sleep(1)
-speak('Hi,welcome ,my name is alexa and i am your speech assistant.Please ensure you are in a quiet Environment.Do you want to continue?') # alxa introduction
+speak('Hi,welcome ,my name is alexa and i am your speech assistant.Please ensure you are in a quiet Environment.Please what is your name?') # alxa introduction
 while (1):
     voice_data = record_audio()
     respond(voice_data)
