@@ -8,6 +8,7 @@ import time
 import random 
 from gtts import gTTS
 import os
+from datetime import datetime
 
 
 #for recognizing the speech
@@ -40,7 +41,7 @@ def record_audio(ask=False):
         try:
             voice_data = r.recognize_google(audio) # recognizes what the user said
         except sr.UnknownValueError:
-            speak('Sorry, i did not get that.Please ensure you are in a quiet environment, Do you want to continue?')
+            speak('Sorry, i did not get that.Kindly ensure you are in a quiet environment and speak well.')
         except sr.RequestError:
             speak('Sorry , my speech service is down.Please try again later')
             exit()
@@ -64,14 +65,17 @@ def respond(voice_data):
     # requesting for user name
     if 'my name is' in voice_data:
         name = voice_data.split('is')[-1]
-        speak(voice_data)
         person_obj.setName(name)
-        speak(f'welcome{person_obj.name},below are my services')
-        services('date','time','make searches','play music','youtube','ask for anything you want')
+        speak(f'welcome{person_obj.name}')
+        speak('services include '+ services('date','time','make searches','play music','youtube',' ask for anything you want'))
 
     # when alexa is being asked of her name
     if 'what is your name' in voice_data:
         speak('My name is Alexa')
+
+
+    if 'services' in voice_data:
+        speak('My services are as follow:\n'+ services('date','time','make searches','play music','youtube',' ask for anything you want'))
 
     # when alexa is being called
     if 'Alexa' in voice_data:
@@ -82,18 +86,23 @@ def respond(voice_data):
 
     #request for date
     if 'date' in voice_data:
-        speak(ctime()|strftime('%d-%m-%Y'))
+        x = datetime.now()
+        speak(f"Today's date is {x.strftime('%d-%B-%Y')}")
+
+    if 'time' in voice_data:
+        x = datetime.now()
+        speak(f"The time is {x.strftime('%H:%M %p')}")
 
     # search for something
     if 'search' in voice_data:
         search =voice_data.split('for')[-1]
         url = 'https://google.com/search?q='+search
         webbrowser.get().open(url)
-        speak('this is the result for '+ search + ',',+ {person_obj.name})
+        speak('this is the result for '+ search + ','+ {person_obj.name})
     
     # search on youtube
     if "youtube" in voice_data:
-        search_term = voice_data.split("for")[-1]
+        search_term = voice_data.split("watch")[-1]
         url = f"https://www.youtube.com/results?search_query={search_term}"
         webbrowser.get().open(url)
         speak(f'Here is what I found for {search_term} on youtube')
@@ -103,7 +112,7 @@ def respond(voice_data):
         music_term = voice_data.split("play me")[-1]
         url = f"https://music.youtube.com/search?q={''.join([music_term])}"
         webbrowser.get().open(url)
-        speak(f'here are the result for  {music_term} on youtube music {person_obj.name}, please kindly choose the one to play')
+        speak(f'here are the result for {music_term} on youtube music {person_obj.name}, please kindly choose the one to play')
 
     # exit the alexa or off alexa
     if 'exit' in voice_data:
@@ -112,7 +121,8 @@ def respond(voice_data):
 
 person_obj= Person()# user instance
 time.sleep(1)
-speak('Hi,welcome ,my name is alexa and i am your speech assistant.Please ensure you are in a quiet Environment.Please what is your name?') # alxa introduction
+speak('Hi,welcome,my name is alexa and i am your speech assistant.') # alxa introduction
+speak('Please what is your name?')
 while (1):
     voice_data = record_audio()
     respond(voice_data)
