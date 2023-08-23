@@ -28,10 +28,17 @@ def services(*args):
         count+=1
     speak('How may i help you')
 
-def mult_request(terms):
+def mult_request(*terms):
     for t in terms:
         if t in voice_data:
             return True
+
+
+def engine_speak(text):
+    '''speak function for offline mode'''
+    text = str(text)
+    engine.say(text)
+    engine.runAndWait()
 
 r = sr.Recognizer()
 
@@ -50,19 +57,16 @@ def record_audio(ask=False):
         except sr.UnknownValueError:
             speak('Sorry, i did not get that.Kindly ensure you are in a quiet environment and speak well.')
         except sr.RequestError as rs:
-            engine_speak('Request error,Sorry , could not get your request')
+            engine_speak('Request error, could not get your request')
             exit()
-        except sr.WaitTimeoutError:
-            engine_speak('Timeout Error')
-        
+        except TimeoutError:
+            engine_speak('there\'s a connection problem')
+        if AttributeError :
+            pass
         return voice_data.lower()
 
 
-def engine_speak(text):
-    '''speak function for offline mode'''
-    text = str(text)
-    engine.say(text)
-    engine.runAndWait()
+
 
 
 def speak(audio_string):
@@ -77,7 +81,8 @@ def speak(audio_string):
         os.remove(audio_file)
     except gTTSError:
         engine_speak('Sorry there\'s a network issue')
-        os.remove(audio_file)
+        exit()
+        # os.remove(audio_file)
     except AssertionError as e:
         print(e)
 
@@ -117,23 +122,32 @@ def respond(voice_data):
         x = datetime.now()
         speak(f"Today's date is {x.strftime('%d-%B-%Y')}")
 
-    if mult_request(['what time is it','what says the time','what is the time']):
+
+    #time
+    if mult_request('what time is it','what says the time','what is the time'):
         x = datetime.now()
         speak(f"The time is {x.strftime('%H:%M %p')}")
 
+
+
+
     # search for something
-    if mult_request(['search','what is']) and not 'what is the time' in voice_data:
+    if mult_request('search','what is') and not 'what is the time' in voice_data:
         search =voice_data.split('for')[-1]
         url = 'https://google.com/search?q='+search
         webbrowser.get().open(url)
         speak('this is the result for '+ search + ','+ person_obj.name)
+
+
     
     # search on youtube
-    if "youtube" in voice_data:
+    if mult_request("youtube",'i want to watch'):
         search_term = voice_data.split("watch")[-1]
         url = f"https://www.youtube.com/results?search_query={search_term}"
         webbrowser.get().open(url)
         speak(f'Here is what I found for {search_term} on youtube')
+
+
 
 
     # Current location as per Google maps
@@ -142,11 +156,16 @@ def respond(voice_data):
         webbrowser.get().open(url)
         speak("You must be somewhere near here, as per Google maps")
 
-    if "weather" in voice_data:
+
+
+    #weather condition
+    if "what is the weather" in voice_data:
         search_term = voice_data.split("for")[-1]
         url = "https://www.google.com/search?q=weather"+search_term
         webbrowser.get().open(url)
         speak("Here is what I found for on google")
+
+
 
     # search on youtube
     if "play me " in voice_data:
@@ -155,8 +174,10 @@ def respond(voice_data):
         webbrowser.get().open(url)
         speak(f'here are the result for {music_term} on youtube music {person_obj.name}, please kindly choose the one to play')
 
+
+
     # exit the alexa or off alexa
-    if 'exit' in voice_data:
+    if mult_request('exit','go off','switch off','off'):
         engine_speak('going offline,have a nice day' )
         exit()
 
